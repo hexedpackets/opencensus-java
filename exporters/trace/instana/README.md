@@ -61,6 +61,17 @@ public class MyMainClass {
 }
 ```
 
+A service name can optionally be mapped for the collected traces by setting it when registering the exporter:
+
+```java
+public class MyMainClass {
+  public static void main(String[] args) throws Exception {
+    InstanaTraceExporter.createAndRegister("http://localhost:42699/com.instana.plugin.generic.trace", "My Service");
+    // ...
+  }
+}
+```
+
 #### Java Versions
 
 Java 6 or above is required for using this exporter.

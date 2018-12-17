@@ -19,6 +19,7 @@ package io.opencensus.exporter.trace.instana;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.google.common.base.Optional;
 import com.google.common.io.BaseEncoding;
 import io.opencensus.common.Duration;
 import io.opencensus.common.Function;
@@ -68,9 +69,11 @@ final class InstanaExporterHandler extends SpanExporter.Handler {
   private static final Tracer tracer = Tracing.getTracer();
   private static final Sampler probabilitySpampler = Samplers.probabilitySampler(0.0001);
   private final URL agentEndpoint;
+  private final Optional<String> serviceName;
 
-  InstanaExporterHandler(URL agentEndpoint) {
+  InstanaExporterHandler(URL agentEndpoint, String serviceName) {
     this.agentEndpoint = agentEndpoint;
+    this.serviceName = Optional.fromNullable(serviceName);
   }
 
   private static String encodeTraceId(TraceId traceId) {
@@ -194,6 +197,9 @@ final class InstanaExporterHandler extends SpanExporter.Handler {
       try {
         HttpURLConnection connection = (HttpURLConnection) agentEndpoint.openConnection();
         connection.setRequestMethod("POST");
+        if (serviceName.isPresent()) {
+          connection.setRequestProperty("X-Instana-Service", serviceName.get());
+        }
         connection.setDoOutput(true);
         outputStream = connection.getOutputStream();
         outputStream.write(json.getBytes(Charset.defaultCharset()));

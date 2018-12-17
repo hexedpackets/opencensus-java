@@ -62,9 +62,24 @@ public final class InstanaTraceExporter {
    * @since 0.12
    */
   public static void createAndRegister(String agentEndpoint) throws MalformedURLException {
+    createAndRegister(agentEndpoint, null);
+  }
+
+  /**
+   * Creates and registers the Instana Trace exporter to the OpenCensus library. Only one Instana
+   * exporter can be registered at any point.
+   *
+   * @param agentEndpoint Ex http://localhost:42699/com.instana.plugin.generic.trace
+   * @param serviceName Explicit service name to map for exported spans.
+   * @throws MalformedURLException if the agentEndpoint is not a valid http url.
+   * @throws IllegalStateException if a Instana exporter is already registered.
+   * @since 0.19
+   */
+  public static void createAndRegister(String agentEndpoint, String serviceName)
+      throws MalformedURLException {
     synchronized (monitor) {
       checkState(handler == null, "Instana exporter is already registered.");
-      Handler newHandler = new InstanaExporterHandler(new URL(agentEndpoint));
+      Handler newHandler = new InstanaExporterHandler(new URL(agentEndpoint), serviceName);
       handler = newHandler;
       register(Tracing.getExportComponent().getSpanExporter(), newHandler);
     }
